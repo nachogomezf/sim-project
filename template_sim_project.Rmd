@@ -1,0 +1,41 @@
+---
+title: "Project name"
+author: "Ignacio Gómez, Gonzalo Pato, Gonzalo Prats"
+institute: "Simulation in Prob and Stats BSc AMC at UC3M"
+date: "April 2023"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 1
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# Introduction
+
+Project explanation with your own words.
+
+```{r chunk_name, echo=TRUE, eval=TRUE}
+2+2
+```
+
+# The project 
+
+Project development including the code and emphasizing the main difficulties and most important parts.
+
+# Results
+
+Numerical results, quality assessment of the approximations, and time efficiency of the algorithms.
+
+# Conclusions
+
+About the results, how the difficulties were solved, and possible alternative approaches. Keep the focus, the conclusions must be as brief as possible.
+
+# References
+
+Including textbooks, webpages, and class notes.
