@@ -1,0 +1,109 @@
+---
+title: "Unit3-DiscreteEvents"
+author: "Gonzalo Pato Montemayor"
+date: "27-02-2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+library(dplyr)
+library(randtests)
+library(EnvStats)
+library(ggplot2)
+set.seed(42)
+```
+
+## Exercise 1
+
+(a) The distribution of the total number of calls in a day is $N(t)$, a poisson process with parameter $\lambda(x) = 1000x^4(1-x)$.
+
+```{r 1a}
+lambda1 <- function(x) {
+    for (i in 1:length(x)){
+        return (1000*x^4*(1-x))
+    }
+}
+x <- seq(0,1,.01)
+ggplot() + geom_line(mapping=aes(x=x, y=lambda1(x)))
+```
+
+(b) Note that the function $$\lambda(x) = 1000B(5,2)X$$ with $X \approx Beta(5,2)$.
+
+Recall $\beta(5,2) = \frac{\Gamma(5)\Gamma(2)}{\Gamma(5+2)}$
+
+```{r 1b}
+set.seed(42)
+MC <- 10000
+# To find the value of m(tl)
+m <- mean(lambda1(runif(MC, 0, 1)))
+# For only one day
+path1 <- function(m){
+    k <- rpois(1, m)
+    v <- 1000*beta(5,2)*rbeta(k, 5, 2)/m
+    v <- sort(v)
+    return(v)
+}
+t <- path1(m)
+min <- function(t){
+    m <- t[2]-t[1]
+    for (i in 2:length(t)-1){
+        if (t[i+1]-t[i] < m) m <- t[i+1]-t[i]
+    }
+    return(m)
+}
+min_t <- min(t)
+
+process <- function(m){
+    times <- path1(m)
+    return(min(t))
+}
+min_times <- replicate(MC, process(m))
+
+```
+
+# Exercise 1
+Computing the inverse we get $$F^{-1}(y) = \frac{2}{\sqrt[3]{1-y}},\,\,\! y>0$$
+```{r 1}
+set.seed(42)
+fun <- function(t){
+    for (i in 1:length(t)){
+        if (t[i] > 2){
+            f <- 1-(2/t)^3
+        } else {
+            f <- 0
+        }
+        return(f)
+    }
+}
+inv <- function(){
+    y <- runif(1, 0, 1)
+    if (y > 0){
+        return(2/(1-y)^(1/3))
+    } else {
+        return(0)
+    }
+}
+MC <- 1000;
+sims <- replicate(MC, inv())
+ks.test(sims, fun)
+ks.test(sims, 'ppareto', shape=3, location=2)
+```
+## Exercise 2
+(a) Through mathematical computations, we have seen that for $M = \frac{4}{3}$, $f_S(t) \le M f_T(t)$.
+(b) Therefore, $\frac{f_S(t)}{M f_T(t)} = \frac{2}{t}$. Following the algorithm in class.
+```{r 2 b}
+set.seed(42)
+f.s.t <- function(t) 2/t
+acceptance.rejection <- function(){
+    f.t <- rpareto(1, location=2, shape=3)
+    while (runif(1) > f.s.t(f.t)) f.t <- rpareto(1, location=2, shape=3)
+    return(f.t)
+}
+```
+(c)
+```{r 2 c}
+MC <- 10000
+x <- replicate(MC, acceptance.rejection())
+t.test(x, conf.level=.99)
+```

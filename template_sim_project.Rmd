@@ -1,5 +1,5 @@
 ---
-title: "Project name"
+title: "Collective risk"
 author: "Ignacio Gómez, Gonzalo Pato, Gonzalo Prats"
 institute: "Simulation in Prob and Stats BSc AMC at UC3M"
 date: "April 2023"
@@ -14,21 +14,126 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Statement
+
+The clients of an insurance company generate claims according to independent (homogeneous) Poisson processes with common rate $\lambda$.
+The claims are independent and the amount of each of them follows a distribution with cdf $F(x) = 1-(100/x)^{2.5}$ if $x > 100$.
+New clients enroll the company according to another (homogeneous) Poisson process with rate $\nu$ and the time they stay in the company follows an exponential distribution with rate $\mu$.
+Each policyholder pays a fixed amount $a$ every year to the company.
+If the policyholder stays in the company only during a fraction of the year, she will pay the corresponding fraction of $a$ which is assumed to be paid on a continuous manner.
+
+If the initial capital is $c_0$ and the initial number of clients is $n_0$, we want to compute the probability that the capital of the company remains positive during some given time $t_l$.
+
+
 
 
 # Introduction
 
 Project explanation with your own words.
 
-```{r chunk_name, echo=TRUE, eval=TRUE}
-2+2
-```
+Each policyholder has a fixed amount $a$ to pay every year, so the capital of the company will increase by $a$ times de number of clients every fraction of year.
+
+On the other hand, they also hold the right to claim the premium on the policy, which happens according to a Poisson process with common rate $\lambda$.
+The amount of is this premium is distributed according to a Pareto distribution with parameters $\alpha = 2.5$ and $\beta = 100$.
+
+The clients of the company can leave the company at any time, and the time they stay in the company follows an exponential distribution with rate $\mu$.
+
+Clients come according to an independent (homogeneous) Poisson processes with rate $\nu$, and they stay according to an exponentially distributed time with rate $\mu$.
+
+So in general, the capital of the company at any time $t$ will be: 
+
+$$C(t) = c_0 + at(n_0+N_A(t)-N_D(t)) - \sum_{j=1}^{N_C(t)} X_j$$
+
+where $N_A(t)$ is the number of clients that arrive by time $t$, $N_D(t)$ is the number of clients that leave by time $t$, $N_C(t)$ is the number of claims that arrive by time $t$, $X_j$ is the amount of the $j$-th claim, and $n(t)$ is the number of clients at time $t$.
 
 # The project 
 
 Project development including the code and emphasizing the main difficulties and most important parts.
 
-# Results
+First, to simulate the amount of the claims we will define a function with the inverse of the cdf of the Pareto distribution. Mathematically, this function is:
+
+$$F^{-1}(x) = \frac{\beta}{\sqrt[\alpha]{(1-x)}} = \frac{100}{\sqrt[2.5]{(1-x)}}$$
+
+```{r inverseclaim, echo=TRUE, message=FALSE, warning=FALSE}
+inverse.claim <- function(x){ return (max((100/(1-x)^(1/2.5)), 0))}
+```
+
+Then, we need to simulate the number of events there will be in the time period $[0, t_l]$, this is, the number of claims, the number of clients that arrive and the number of clients that leave. For this, we will use the function `rpois` from the `stats` package, which simulates a Poisson random variable with rate $\lambda$.
+
+```{r n_events, echo=TRUE, message=FALSE, warning=FALSE}
+n.claims <- function(lambda, tl){ return (rpois(1, lambda*tl))}
+n.nclients <- function(mu, tl){ return (rpois(1, mu*tl))}
+n.departures <- function(nu, tl){ return (rpois(1, nu*tl))}
+```
+
+
+Algorithm:
+1. Initialize variables t=0, n=n0, c=c0.
+2. While t < tl:
+  2.1 Compute the time of the event: dt = rexp(1, lambda*n + mu*n + nu)
+  2.2 Update the time: t = t + dt
+  2.3 If t > tl, break
+  2.4 Decide the type of event and update in each case:
+    2.4.1 If u < lambda*n/(lambda*n + mu*n + nu), claim event so update capital
+    2.4.2 If u < (lambda*n + mu*n)/(lambda*n + mu*n + nu), departure event so update number of clients
+    2.4.3 Else, enrollment event, so update number of clients
+  2.5 Update capital with the proportional part of the payments: c = c + n*a*dt
+
+```
+simulate_insurance <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
+  # Initialize variables
+  t <- 0
+  n <- n0
+  c <- c0
+  paths <- rep(0, MC)
+ # Simulate MC paths
+  for (i in 1:MC) {
+    while (t < tl) {
+      # Time of next event
+      dt <- rexp(1, lambda * n + mu * n + nu)
+      t <- t + dt
+      if (t > tl) {break}
+      # Decide the type of event
+      u <- runif(1)
+      if (u < lambda * n / (lambda * n + mu * n + nu)) {
+        # Claim event
+        claim_amount <- sum(runif(rpois(1, lambda * n)) > (100 / qweibull(runif(rpois(1, lambda * n)), shape = 2.5, scale = 100)))
+        c <- c - claim_amount
+      } else if (u < (lambda * n + mu * n) / (lambda * n + mu * n + nu)) {
+        # Departure event
+        n <- n - 1
+        if (n < 0) n <- 0
+      } else {
+        # Enrolment event
+        n <- n + 1
+      }
+      
+      # Update capital with annuity payments
+      c <- c + n * a * dt
+      
+      # Stop if capital becomes negative
+      if (c < 0) break
+    }
+     
+    # Record path if capital remains positive
+    if (c >= 0) paths[i] <- 1
+    
+    # Reset variables for next path
+    t <- 0
+    n <- n0
+    c <- c0
+
+  }
+  # Compute and return outputs
+  fraction <- sum(paths) / MC
+  final_capital <- c[paths == 1]
+  mean_final_capital <- mean(final_capital)
+  sd_final_capital <- sd(final_capital)
+  list(fraction = fraction, mean_final_capital = mean_final_capital, sd_final_capital = sd_final_capital)
+}
+```
+
+# Results 
 
 Numerical results, quality assessment of the approximations, and time efficiency of the algorithms.
 
