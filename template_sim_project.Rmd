@@ -12,6 +12,8 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(cowplot)
 ```
 
 # Statement
@@ -23,9 +25,6 @@ Each policyholder pays a fixed amount $a$ every year to the company.
 If the policyholder stays in the company only during a fraction of the year, she will pay the corresponding fraction of $a$ which is assumed to be paid on a continuous manner.
 
 If the initial capital is $c_0$ and the initial number of clients is $n_0$, we want to compute the probability that the capital of the company remains positive during some given time $t_l$.
-
-
-
 
 # Introduction
 
@@ -55,85 +54,93 @@ First, to simulate the amount of the claims we will define a function with the i
 $$F^{-1}(x) = \frac{\beta}{\sqrt[\alpha]{(1-x)}} = \frac{100}{\sqrt[2.5]{(1-x)}}$$
 
 ```{r inverseclaim, echo=TRUE, message=FALSE, warning=FALSE}
-inverse.claim <- function(x){ return (max((100/(1-x)^(1/2.5)), 0))}
+inverse.claim <- function(x) {
+  return(max((100 / (1 - x)^(1 / 2.5)), 0))
+}
 ```
 
-Then, we need to simulate the number of events there will be in the time period $[0, t_l]$, this is, the number of claims, the number of clients that arrive and the number of clients that leave. For this, we will use the function `rpois` from the `stats` package, which simulates a Poisson random variable with rate $\lambda$.
+The algorithm we will follow is, for each path:
+1. Initialize variables $t=0, n=n0, c=c0$.
+2. Compute the time of the first event: $dt = rexp(1, lambda*n + mu*n + nu)$
+3. Update the time: $t = t + dt$
+4. While $t < tl$:
+  4.1 Update capital with the proportional part of the payments: $c = c + n*a*dt$
+  4.2 Decide the type of event and update in each case:
+    4.2.1 If $u < lambda*n/(lambda*n + mu*n + nu)$, claim event so update capital $ = c - X_j$
+    4.2.2 If $u < (lambda*n + mu*n)/(lambda*n + mu*n + nu)$, departure event so $n=n-1$
+    4.2.3 Else, enrollment event, so $n=n+1$
+  4.3 Compute the time of the next event: $dt = rexp(1, lambda*n + mu*n + nu)$
+  4.4 Update the time: $t = t + dt$
 
-```{r n_events, echo=TRUE, message=FALSE, warning=FALSE}
-n.claims <- function(lambda, tl){ return (rpois(1, lambda*tl))}
-n.nclients <- function(mu, tl){ return (rpois(1, mu*tl))}
-n.departures <- function(nu, tl){ return (rpois(1, nu*tl))}
-```
+Thus for one simulation we have:
 
-
-Algorithm:
-1. Initialize variables t=0, n=n0, c=c0.
-2. While t < tl:
-  2.1 Compute the time of the event: dt = rexp(1, lambda*n + mu*n + nu)
-  2.2 Update the time: t = t + dt
-  2.3 If t > tl, break
-  2.4 Decide the type of event and update in each case:
-    2.4.1 If u < lambda*n/(lambda*n + mu*n + nu), claim event so update capital
-    2.4.2 If u < (lambda*n + mu*n)/(lambda*n + mu*n + nu), departure event so update number of clients
-    2.4.3 Else, enrollment event, so update number of clients
-  2.5 Update capital with the proportional part of the payments: c = c + n*a*dt
-
-```
-simulate_insurance <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
+```{r simfunction}
+simulate_one_insurance <- function(c0, n0, a, tl, lambda, mu, nu) {
   # Initialize variables
   t <- 0
   n <- n0
   c <- c0
-  paths <- rep(0, MC)
- # Simulate MC paths
-  for (i in 1:MC) {
-    while (t < tl) {
-      # Time of next event
-      dt <- rexp(1, lambda * n + mu * n + nu)
-      t <- t + dt
-      if (t > tl) {break}
-      # Decide the type of event
-      u <- runif(1)
-      if (u < lambda * n / (lambda * n + mu * n + nu)) {
-        # Claim event
-        claim_amount <- sum(runif(rpois(1, lambda * n)) > (100 / qweibull(runif(rpois(1, lambda * n)), shape = 2.5, scale = 100)))
-        c <- c - claim_amount
-      } else if (u < (lambda * n + mu * n) / (lambda * n + mu * n + nu)) {
-        # Departure event
-        n <- n - 1
-        if (n < 0) n <- 0
-      } else {
-        # Enrolment event
-        n <- n + 1
-      }
-      
-      # Update capital with annuity payments
-      c <- c + n * a * dt
-      
-      # Stop if capital becomes negative
-      if (c < 0) break
+  # Update capital with annuity payments
+  dt <- rexp(1, lambda * n + mu * n + nu)
+  t <- t + dt
+  while (t < tl) {
+    # Update the capital with the proportional part of the payments
+    c <- c + n * a * dt
+    # Decide the type of event
+    u <- runif(1)
+    if (u < lambda * n / (lambda * n + mu * n + nu)) {
+      # Claim event
+      claim_amount <- inverse.claim(runif(1))
+      c <- c - claim_amount
+    } else if (u < (lambda * n + mu * n) / (lambda * n + mu * n + nu)) {
+      # Departure event
+      n <- max(n - 1, 0)
+    } else {
+      # Enrollment event
+      n <- n + 1
     }
-     
-    # Record path if capital remains positive
-    if (c >= 0) paths[i] <- 1
-    
-    # Reset variables for next path
-    t <- 0
-    n <- n0
-    c <- c0
-
+    # Stop if capital becomes negative
+    if (c < 0) break
+    # Time of next event
+    dt <- rexp(1, lambda * n + mu * n + nu)
+    t <- t + dt
   }
+  return(c)
+}
+```
+
+And for multiple: 
+```{r siminsurance}
+simulate_insurance <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
+  final_capitals <- vector("numeric", MC)
+  # Simulate MC paths
+  final_capitals <- replicate(MC, simulate_one_insurance(c0, n0, a, tl, lambda, mu, nu))
   # Compute and return outputs
-  fraction <- sum(paths) / MC
-  final_capital <- c[paths == 1]
-  mean_final_capital <- mean(final_capital)
-  sd_final_capital <- sd(final_capital)
-  list(fraction = fraction, mean_final_capital = mean_final_capital, sd_final_capital = sd_final_capital)
+  fraction <- sum(final_capitals > 0) / MC
+  pos_fc <- final_capitals[final_capitals > 0]
+  mean_final_capitals <- mean(pos_fc)
+  sd_final_capitals <- sd(pos_fc)
+  p1 <- ggplot() + 
+        geom_line(mapping= aes(x = 1:length(pos_fc), 
+                               y = cumsum(pos_fc)/(1:length(pos_fc))))
+  p2 <- ggplot() + 
+        geom_histogram(mapping= aes(x = pos_fc, y=after_stat(density)),
+                       binwidth=5000, color = "black", fill = "white") + 
+        geom_density(mapping= aes(x = pos_fc), color = "red")
+  print(plot_grid(p1, p2, labels="AUTO"))
+  return(list(fraction = fraction, mean_final_capital = mean_final_capitals,
+              sd_final_capital = sd_final_capitals))
 }
 ```
 
 # Results 
+
+```{r funsim}
+set.seed(42)
+res <- simulate_insurance(c0 = 1000, n0 = 100, a = 100, tl = 100, 
+                          lambda = 0.1, mu = 0.1, nu = 0.1, MC = 10000)
+res
+```
 
 Numerical results, quality assessment of the approximations, and time efficiency of the algorithms.
 
