@@ -28,9 +28,7 @@ If the initial capital is $c_0$ and the initial number of clients is $n_0$, we w
 
 # Introduction
 
-Project explanation with your own words.
-
-Each policyholder has a fixed amount $a$ to pay every year, so the capital of the company will increase by $a$ times de number of clients every fraction of year.
+Each policyholder has a fixed amount $a$ to pay every year, so the capital of the company will increase by $a$ times the number of clients every fraction of year.
 
 On the other hand, they also hold the right to claim the premium on the policy, which happens according to a Poisson process with common rate $\lambda$.
 The amount of is this premium is distributed according to a Pareto distribution with parameters $\alpha = 2.5$ and $\beta = 100$.
@@ -60,17 +58,30 @@ inverse.claim <- function(x) {
 ```
 
 The algorithm we will follow is, for each path:
-1. Initialize variables $t=0, n=n0, c=c0$.
-2. Compute the time of the first event: $dt = rexp(1, lambda*n + mu*n + nu)$
-3. Update the time: $t = t + dt$
+
+1.  Initialize variables $t=0, n=n0, c=c0$.
+
+2.  Compute the time of the first event: $dt = rexp(1, lambda*n + mu*n + nu)$
+
+3.  Update the time: $t = t + dt$
+
 4. While $t < tl$:
-  4.1 Update capital with the proportional part of the payments: $c = c + n*a*dt$
-  4.2 Decide the type of event and update in each case:
-    4.2.1 If $u < lambda*n/(lambda*n + mu*n + nu)$, claim event so update capital $ = c - X_j$
-    4.2.2 If $u < (lambda*n + mu*n)/(lambda*n + mu*n + nu)$, departure event so $n=n-1$
-    4.2.3 Else, enrollment event, so $n=n+1$
-  4.3 Compute the time of the next event: $dt = rexp(1, lambda*n + mu*n + nu)$
-  4.4 Update the time: $t = t + dt$
+    
+    4.1. Update capital with the proportional part of the payments: $c = c + n*a*dt$
+
+    4.2. Decide the type of event and update in each case:
+    
+    <ul>
+        <li>&nbsp;&nbsp;&nbsp;&nbsp;4.2.1. If $u < lambda*n/(lambda*n + mu*n + nu)$, claim event so update capital $= c - X_j$</li>
+
+        <li>&nbsp;&nbsp;&nbsp;&nbsp;4.2.2. If $u < (lambda*n + mu*n)/(lambda*n + mu*n + nu)$, departure event so $n=n-1$</li>
+
+        <li>&nbsp;&nbsp;&nbsp;&nbsp;4.2.3. Else, enrollment event, so $n=n+1$</li>
+    </ul>
+        
+    4.3.  Compute the time of the next event: $dt = rexp(1, lambda*n + mu*n + nu)$
+
+    4.4.  Update the time: $t = t + dt$
 
 Thus for one simulation we have:
 
