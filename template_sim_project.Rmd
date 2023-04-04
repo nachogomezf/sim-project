@@ -11,7 +11,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.fullwidth=TRUE, fig.height=3)
 library(ggplot2)
 library(cowplot)
 ```
@@ -72,9 +72,9 @@ The algorithm we will follow is, for each path:
     4.2. Decide the type of event and update in each case:
     
     <ul>
-        <li>&nbsp;&nbsp;&nbsp;&nbsp;4.2.1. If $u < lambda*n/(lambda*n + mu*n + nu)$, claim event so update capital $= c - X_j$</li>
+        <li>&nbsp;&nbsp;&nbsp;&nbsp;4.2.1. If $u < \lambda*n/(\lambda*n + \mu*n + \nu)$, claim event so update capital $= c - X_j$</li>
 
-        <li>&nbsp;&nbsp;&nbsp;&nbsp;4.2.2. If $u < (lambda*n + mu*n)/(lambda*n + mu*n + nu)$, departure event so $n=n-1$</li>
+        <li>&nbsp;&nbsp;&nbsp;&nbsp;4.2.2. If $u < (\lambda*n + \mu*n)/(\lambda*n + \mu*n + \nu)$, departure event so $n=n-1$</li>
 
         <li>&nbsp;&nbsp;&nbsp;&nbsp;4.2.3. Else, enrollment event, so $n=n+1$</li>
     </ul>
@@ -133,12 +133,18 @@ simulate_insurance <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
   sd_final_capitals <- sd(pos_fc)
   p1 <- ggplot() + 
         geom_line(mapping= aes(x = 1:length(pos_fc), 
-                               y = cumsum(pos_fc)/(1:length(pos_fc))))
+                               y = cumsum(pos_fc)/(1:length(pos_fc)))) +
+        labs(x = "Number of simulations", y = "Mean of final capitals",
+               title = "Convergence of the mean of the final capitals")
+  plot(p1)
   p2 <- ggplot() + 
         geom_histogram(mapping= aes(x = pos_fc, y=after_stat(density)),
                        binwidth=5000, color = "black", fill = "white") + 
-        geom_density(mapping= aes(x = pos_fc), color = "red")
-  print(plot_grid(p1, p2, labels="AUTO"))
+        stat_function(fun=dnorm, args=list(mean=mean_final_capitals, sd = sd_final_capitals), 
+                      color = "red") +
+        labs(x = "Final capitals", y = "Density", 
+               title = "Density of the final capitals")
+  plot(p2)
   return(list(fraction = fraction, mean_final_capital = mean_final_capitals,
               sd_final_capital = sd_final_capitals))
 }
