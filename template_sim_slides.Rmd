@@ -9,37 +9,39 @@ output:
     theme: Madrid
 ---
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 # Contents
 
-- **Introduction**
-- **The project**
-- **Results**
-- **Conclusions**
-- **References**
+-   **Introduction**
+-   **The project**
+-   **Results**
+-   **Conclusions**
+-   **References**
 
 # Introduction
 
-- Goal:
-    - Compute the probability that the capital of an insurance company remains positive during a given time period
-- Data:
-  - Premium: $a$
-  - Claims rate: $Poisson (\lambda)$
-  - Premium amount: $Pareto (2.5, 100)$
-  - Enrollment rate: $Poisson(\nu)$
-  - Departure rate: $Exp(\mu)$
-  - Initial capital: $c_0$
+-   Goal:
+    -   Compute the probability that the capital of an insurance company remains positive during a given time period
+-   Data:
+    -   Premium: $a$
+    -   Claims rate: $Poisson (\lambda)$
+    -   Premium amount: $Pareto (2.5, 100)$
+    -   Enrollment rate: $Poisson(\nu)$
+    -   Departure rate: $Exp(\mu)$
+    -   Initial capital: $c_0$
 
 # Introduction
 
-So in general, the capital of the company at any time $t$ will be: 
+So in general, the capital of the company at any time $t$ will be:
 
 $$C(t) = c_0 + at(n_0+N_A(t)-N_D(t)) - \sum_{j=1}^{N_C(t)} X_j$$
 
 where:
+
+```{=tex}
 \begin{itemize}
 \item $N_A(t)$ is the number of clients that arrive by time $t$
 \item $N_D(t)$ is the number of clients that leave by time $t$
@@ -47,17 +49,27 @@ where:
 \item $X_j$ is the amount of the $j$-th claim
 \item $n(t)$ is the number of clients at time $t$.
 \end{itemize}
-
-
-
-# The project 
+```
+# The project
 
 ![alt text](flux.png "Title")
 
-
 # Results
 
-Numerical results, quality assessment of the approximations, and time efficiency of the algorithms. Use tables and/or charts.
+Both the discrete event simulation algorithm we developed and the one using antithetic variables gave the same results, meaning that the variance was not reduced from the original algorithm. These were the results:
+
+```{=tex}
+\begin{itemize}
+\item Fraction of paths (simulations) that remained positive throughout their respective lengths: 0.9984
+\item Mean of the final capital for those positive paths: 91573.45
+\item Standard deviation of the final capital for those positive paths: 9182.815
+\end{itemize}
+```
+These were the results for $c_0 = 1000$, $n_0 = 100$, $a = 100$, $tl = 100$, $\lambda = 0.1$, $\mu = 0.1$, $\nu = 0.1$ and $MC = 10000$:
+<div style="display:flex">
+  <img src="mean_final_cap.png" style="width:50%">
+  <img src="densities_final_cap.png" style="width:50%">
+</div>
 
 # Conclusions
 
