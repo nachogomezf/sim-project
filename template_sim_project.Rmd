@@ -149,6 +149,42 @@ simulate_insurance <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
               sd_final_capital = sd_final_capitals))
 }
 ```
+# Antithetic variates
+We try a variance reduction technique called antithetic variates. The idea is to simulate pairs of antithetic paths, that is, paths with the same initial conditions but with the sign of the increments changed. 
+This way, the variance of the final capital is reduced by a factor of 2. The algorithm is the same as before, but we will simulate $MC/2$ pairs of antithetic paths. 
+The final capital of the $i$-th path will be the sum of the final capital of the $i$-th antithetic path and the final capital of the $(MC/2 + i)$-th antithetic path. 
+```{r antithetic}
+simulate_insurance_antithetic <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
+  final_capitals <- vector("numeric", MC)
+  # Simulate MC pairs of antithetic paths
+  for (i in 1:(MC/2)) {
+    final_capitals[i] <- simulate_one_insurance(c0, n0, a, tl, lambda, mu, nu)
+    final_capitals[i + (MC/2)] <- simulate_one_insurance(c0, n0, a, tl, lambda, mu, nu) * -1
+  }
+  # Compute and return outputs
+  antithetic_final_capitals <- c(final_capitals[1:(MC/2)], -final_capitals[(MC/2+1):MC])
+  fraction <- sum(antithetic_final_capitals > 0) / MC
+  pos_fc <- antithetic_final_capitals[antithetic_final_capitals > 0]
+  mean_final_capitals <- mean(pos_fc)
+  sd_final_capitals <- sd(pos_fc)
+  p1 <- ggplot() + 
+    geom_line(mapping= aes(x = 1:length(pos_fc), 
+                           y = cumsum(pos_fc)/(1:length(pos_fc)))) +
+    labs(x = "Number of simulations", y = "Mean of final capitals",
+         title = "Convergence of the mean of the final capitals")
+  plot(p1)
+  p2 <- ggplot() + 
+    geom_histogram(mapping= aes(x = pos_fc, y=after_stat(density)),
+                   binwidth=5000, color = "black", fill = "white") + 
+    stat_function(fun=dnorm, args=list(mean=mean_final_capitals, sd = sd_final_capitals), 
+                  color = "red") +
+    labs(x = "Final capitals", y = "Density", 
+         title = "Density of the final capitals")
+  plot(p2)
+  return(list(fraction = fraction, mean_final_capital = mean_final_capitals,
+              sd_final_capital = sd_final_capitals))
+}
+```
 
 # Results 
 
@@ -158,6 +194,14 @@ res <- simulate_insurance(c0 = 1000, n0 = 100, a = 100, tl = 100,
                           lambda = 0.1, mu = 0.1, nu = 0.1, MC = 10000)
 res
 ```
+
+```{r funsim_antithetic}
+set.seed(42)
+res <- simulate_insurance_antithetic(c0 = 1000, n0 = 100, a = 100, tl = 100, 
+                          lambda = 0.1, mu = 0.1, nu = 0.1, MC = 10000)
+res
+```
+
 
 Numerical results, quality assessment of the approximations, and time efficiency of the algorithms.
 
