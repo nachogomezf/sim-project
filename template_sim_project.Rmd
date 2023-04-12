@@ -60,9 +60,9 @@ inverse.claim <- function(x) {
 
 The algorithm we will follow is, for each path:
 
-1.  Initialize variables $t=0, n=n0, c=c0$.
+1.  Initialize variables $t=0, n=n_0, c=c_0$.
 
-2.  Compute the time of the first event: $dt = rexp(1, lambda*n + mu*n + nu)$
+2.  Compute the time of the first event: $dt = rexp(1, \lambda*n + \mu*n + \nu)$
 
 3.  Update the time: $t = t + dt$
 
@@ -80,7 +80,7 @@ The algorithm we will follow is, for each path:
         <li>&nbsp;&nbsp;&nbsp;&nbsp;4.2.3. Else, enrollment event, so $n=n+1$</li>
     </ul>
         
-    4.3.  Compute the time of the next event: $dt = rexp(1, lambda*n + mu*n + nu)$
+    4.3.  Compute the time of the next event: $dt = rexp(1, \lambda*n + \mu*n + \nu)$
 
     4.4.  Update the time: $t = t + dt$
 
@@ -177,7 +177,8 @@ simulate_one_insurance_antithetic <- function(c0, n0, a, tl, lambda, mu, nu) {
       # Enrollment event
       n <- n + 1
     }
-    # Stop if both capitals becomes negative, if only one does, we keep going with the other
+    # Stop if both capitals becomes negative, if only one does,
+    # we keep going with the other
     if (c < 0 && c_anti < 0) break
     # Time of next event
     dt <- rexp(1, lambda * n + mu * n + nu)
@@ -235,9 +236,13 @@ p1 <- ggplot() +
 plot(p1)
 p2 <- ggplot() + 
       geom_histogram(mapping= aes(x = num.normal, y=after_stat(density)),
-                      binwidth=5000, color = "black", fill = "white") + 
-      stat_function(fun=dnorm, args=list(mean=res_normal['mean_final_capitals'], 
-                    sd = res_normal['sd_final_capitals']), color = "red") +
+                      binwidth=5000, color = "black", fill = "black", alpha = .5) + 
+      stat_function(fun=dnorm, args=list(mean=mean(num.normal), 
+                    sd = sd(num.normal), color = "black")) +
+      geom_histogram(mapping= aes(x = num.anti, y=after_stat(density)),
+                      binwidth=5000, color = "red", fill = "red", alpha = .5) + 
+      stat_function(fun=dnorm, args=list(mean=mean(num.anti), 
+                    sd = sd(num.anti), color = "red")) +
       labs(x = "Final capitals", y = "Density", 
               title = "Density of the final capitals")
 plot(p2)
