@@ -152,7 +152,50 @@ simulate_insurance <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
 # Antithetic variates
 We try a variance reduction technique called antithetic variates. The idea is to simulate pairs of antithetic paths, that is, paths with the same initial conditions but with the sign of the increments changed. 
 This way, the variance of the final capital is reduced by a factor of 2. The algorithm is the same as before, but we will simulate $MC/2$ pairs of antithetic paths. 
-The final capital of the $i$-th path will be the sum of the final capital of the $i$-th antithetic path and the final capital of the $(MC/2 + i)$-th antithetic path. 
+The final capital of the $i$-th path will be the sum of the final capital of the $i$-th antithetic path and the final capital of the $(MC/2 + i)$-th antithetic path.
+
+```{r antitheticfunction}
+simulate_one_insurance_antithetic <- function(c0, n0, a, tl, lambda, mu, nu) {
+  # Initialize variables
+  t <- 0
+  n <- n0
+  c <- c0
+  c_anti <- c0
+  # Update capital with annuity payments
+  dt <- rexp(1, lambda * n + mu * n + nu)
+  t <- t + dt
+  while (t < tl) {
+    # Update the capital with the proportional part of the payments
+    c <- c + n * a * dt
+    # Decide the type of event
+    u <- runif(1)
+    if (u < lambda * n / (lambda * n + mu * n + nu)) {
+      # Claim event
+      u <- runif(1)
+      if (c > 0) { # If the capital is positive, we can perform a claim
+        claim_amount <- inverse.claim(u)
+        c <- c - claim_amount
+      }
+      if (c_anti > 0) { # If the capital is positive for antithetic, we can perform a claim
+        claim_anti <- inverse.claim(1-u)
+        c_anti <- c_anti - claim_anti
+      }
+    } else if (u < (lambda * n + mu * n) / (lambda * n + mu * n + nu)) {
+      # Departure event
+      n <- max(n - 1, 0)
+    } else {
+      # Enrollment event
+      n <- n + 1
+    }
+    # Stop if both capitals becomes negative, if only one does, we keep going with the other
+    if (c < 0 && c_anti < 0) break
+    # Time of next event
+    dt <- rexp(1, lambda * n + mu * n + nu)
+    t <- t + dt
+  }
+  return(c(c, c_anti))
+}
+```
 ```{r antithetic}
 simulate_insurance_antithetic <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
   final_capitals <- vector("numeric", MC)
@@ -190,7 +233,7 @@ simulate_insurance_antithetic <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
 
 ```{r funsim}
 set.seed(42)
-res <- simulate_insurance(c0 = 1000, n0 = 100, a = 100, tl = 100, 
+res <- simulate_one_insurance_antithetic(c0 = 1000, n0 = 100, a = 100, tl = 100, 
                           lambda = 0.1, mu = 0.1, nu = 0.1, MC = 10000)
 res
 ```
