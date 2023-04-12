@@ -56,21 +56,26 @@ where:
 
 # Results
 
-Both the discrete event simulation algorithm we developed and the one using antithetic variables gave the same results, meaning that the variance was not reduced from the original algorithm. These were the results:
+We used 2 different approaches for this problem
 
 ```{=tex}
 \begin{itemize}
-\item Fraction of paths (simulations) that remained positive throughout their respective lengths: 0.9984
-\item Mean of the final capital for those positive paths: 91573.45
-\item Standard deviation of the final capital for those positive paths: 9182.815
+\item A discrete event simulation algorithm we developed
+\item An improved version of our algorithm using antithetic variables to reduce the variance
 \end{itemize}
 ```
 These were the results for $c_0 = 1000$, $n_0 = 100$, $a = 100$, $tl = 100$, $\lambda = 0.1$, $\mu = 0.1$, $\nu = 0.1$ and $MC = 10000$:
 
+```{r, out.width='80%', fig.align='center', echo=FALSE}
+knitr::include_graphics(c("results_table_comparison.png"))
+```
+
 # Results
 
+These graphs show both the convergence of the mean of the final capitals in terms of the number of simulations and the density of the final capitals. Note that the color red indicates the antithetic variables approach
+
 ```{r, out.width='80%', fig.align='center', echo=FALSE}
-knitr::include_graphics(c("mean_final_cap.png", "densities_final_cap.png"))
+knitr::include_graphics(c("mean_final_cap.png", "densities_final_caps.png"))
 ```
 
 # Conclusions
