@@ -7,6 +7,8 @@ output:
   beamer_presentation:
     colortheme: rose
     theme: Madrid
+bibliography: "cite_packages.bib"
+nocite: '@*'
 ---
 
 ```{r setup, include=FALSE}
@@ -85,4 +87,4 @@ About the results, how the difficulties were solved, and possible alternative ap
 
 # References
 
-Including textbooks, webpages, and class notes.
+<div id="refs"></div>
