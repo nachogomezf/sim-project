@@ -7,6 +7,8 @@ output:
   pdf_document:
     toc: true
     toc_depth: 1
+bibliography: "cite_packages.bib"
+nocite: '@*'
 ---
 
 
@@ -262,4 +264,4 @@ About the results, how the difficulties were solved, and possible alternative ap
 
 # References
 
-Including textbooks, webpages, and class notes.
+<div id="refs"></div>
