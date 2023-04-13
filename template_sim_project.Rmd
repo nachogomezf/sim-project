@@ -221,11 +221,22 @@ res_normal <- simulate_insurance(c0 = 1000, n0 = 100, a = 100, tl = 100,
                           lambda = 0.1, mu = 0.1, nu = 0.3, MC = 10000)
 res_anti <- simulate_insurance_antithetic(c0 = 1000, n0 = 100, a = 100, tl = 100, 
                           lambda = 0.1, mu = 0.1, nu = 0.3, MC = 10000)
-kable(rbind(res_normal[1:3], res_anti[1:3]), 
+
+time_normal <- system.time(simulate_insurance(c0 = 1000, n0 = 100, a = 100, tl = 100, 
+                          lambda = 0.1, mu = 0.1, nu = 0.3, MC = 10000))
+time_anti <- system.time(simulate_insurance_antithetic(c0 = 1000, n0 = 100, a = 100, tl = 100, 
+                          lambda = 0.1, mu = 0.1, nu = 0.3, MC = 10000))
+names(time_normal)[3] <- "time elapsed"
+names(time_anti)[3] <- "time elapsed"
+```
+
+```{r results, echo = FALSE}
+kable(rbind(c(res_normal[1:3], time_normal[3]), c(res_anti[1:3], time_anti[3])), 
       caption = "Results of the simulation with and without antithetic variates") # %>%
   # kable_styling(latex_options = c("striped", "scale_down"), 
                 # full_width = FALSE)
 ```
+
 
 ```{r create graphs, echo = FALSE, warning=FALSE}
 num.normal <- as.numeric(unlist(res_normal['pos_fc']))
