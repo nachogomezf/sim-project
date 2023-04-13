@@ -51,8 +51,9 @@ where:
 \end{itemize}
 ```
 # The project
-
-![alt text](flux.png "Title")
+```{r, out.width='70%', fig.align='center', echo=FALSE}
+knitr::include_graphics(c("flux.png"))
+```
 
 # Results
 
@@ -74,7 +75,7 @@ knitr::include_graphics(c("results_table_comparison.png"))
 
 These graphs show both the convergence of the mean of the final capitals in terms of the number of simulations and the density of the final capitals. Note that the color red indicates the antithetic variables approach
 
-```{r, out.width='80%', fig.align='center', echo=FALSE}
+```{r, fig.show="hold", out.width="45%", echo=FALSE}
 knitr::include_graphics(c("mean_final_cap.png", "densities_final_caps.png"))
 ```
 

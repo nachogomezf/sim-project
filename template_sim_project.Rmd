@@ -10,10 +10,12 @@ output:
 ---
 
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, echo=FALSE}
 library(ggplot2)
 library(cowplot)
 library(knitr)
+library(dplyr)
+#library(kableExtra)
 opts_chunk$set(echo = TRUE, fig.fullwidth=TRUE, fig.height=3)
 ```
 
@@ -218,12 +220,12 @@ res_normal <- simulate_insurance(c0 = 1000, n0 = 100, a = 100, tl = 100,
 res_anti <- simulate_insurance_antithetic(c0 = 1000, n0 = 100, a = 100, tl = 100, 
                           lambda = 0.1, mu = 0.1, nu = 0.3, MC = 10000)
 kable(rbind(res_normal[1:3], res_anti[1:3]), 
-      caption = "Results of the simulation with and without antithetic variates") %>%
-  kable_styling(latex_options = c("striped", "scale_down"), 
-                full_width = FALSE)
+      caption = "Results of the simulation with and without antithetic variates") # %>%
+  # kable_styling(latex_options = c("striped", "scale_down"), 
+                # full_width = FALSE)
 ```
 
-```{r create graphs, echo = FALSE}
+```{r create graphs, echo = FALSE, warning=FALSE}
 num.normal <- as.numeric(unlist(res_normal['pos_fc']))
 num.anti <- as.numeric(unlist(res_anti['pos_fc']))
 p1 <- ggplot() + 
@@ -236,18 +238,20 @@ p1 <- ggplot() +
       labs(x = "Number of simulations", y = "Mean of final capitals",
            title = "Convergence of the mean of the final capitals")
 plot(p1)
+ggsave("mean_final_cap.png", p1, width = 10, height = 5)
 p2 <- ggplot() + 
       geom_histogram(mapping= aes(x = num.normal, y=after_stat(density)),
                       binwidth=5000, color = "black", fill = "black", alpha = .5) + 
       stat_function(fun=dnorm, args=list(mean=mean(num.normal), 
-                    sd = sd(num.normal), color = "black")) +
+                    sd = sd(num.normal), colour = "black")) +
       geom_histogram(mapping= aes(x = num.anti, y=after_stat(density)),
                       binwidth=5000, color = "red", fill = "red", alpha = .5) + 
       stat_function(fun=dnorm, args=list(mean=mean(num.anti), 
-                    sd = sd(num.anti), color = "red")) +
+                    sd = sd(num.anti), colour = "red")) +
       labs(x = "Final capitals", y = "Density", 
-              title = "Density of the final capitals")
+              title = "Histogram of the final capitals")
 plot(p2)
+ggsave("densities_final_caps.png", p2, width = 10, height = 5)
 ```
 
 Numerical results, quality assessment of the approximations, and time efficiency of the algorithms.
