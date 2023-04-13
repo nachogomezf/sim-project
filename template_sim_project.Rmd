@@ -274,5 +274,3 @@ Numerical results, quality assessment of the approximations, and time efficiency
 About the results, how the difficulties were solved, and possible alternative approaches. Keep the focus, the conclusions must be as brief as possible.
 
 # References
-
-<div id="refs"></div>
