@@ -260,8 +260,7 @@ simulate_results <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
 ```
 
 
-**AQUÍ IRÍA LO DE LOS PARAMETROS**
-**1**
+**1** Simulating with $c_0 = 1000$, $n_0 = 100$, $a = 100$, $t_l = 100$, $\lambda = 0.1$, $\mu = 0.1$, $\nu = 0.3$ and $M_C = 10000$.
 ```{r do simulations, echo = FALSE}
 set.seed(42)
 c0 <- 1000
@@ -278,8 +277,8 @@ unlist(v$k)
 ```{r, echo = FALSE, fig.align='center'}
 make_plots(v$rn, v$ra, paste(c0, n0, a, tl, lambda, mu, nu, MC, sep = "_"))
 ```
-**2**
-```{r do simulations, echo = FALSE}
+**2** Simulating with $c_0 = 100$, $n_0 = 10000$, $a = 20$, $t_l = 50$, $\lambda = 0.05$, $\mu = 0.2$, $\nu = 0.6$ and $M_C = 1000$.
+```{r do simulations2, echo = FALSE}
 set.seed(42)
 c0 <- 100
 n0 <- 10000
@@ -288,15 +287,15 @@ tl <- 50
 lambda <- 0.05
 mu <- 0.2
 nu <- 0.6
-MC <- 10000
+MC <- 1000
 v <- simulate_results(c0 = c0, n0 = n0, a = a, tl = tl, lambda = lambda, mu = mu, nu = nu, MC = MC)
 unlist(v$k)
 ```
 ```{r, echo = FALSE, fig.align='center'}
 make_plots(v$rn, v$ra, paste(c0, n0, a, tl, lambda, mu, nu, MC, sep = "_"))
 ```
-**3**
-```{r do simulations, echo = FALSE}
+**3**Simulating with $c_0 = 10000$, $n_0 = 5$, $a = 2000$, $t_l = 25$, $\lambda = 0.5$, $\mu = 0.1$, $\nu = 0.8$ and $M_C = 10000$.
+```{r do simulations3, echo = FALSE}
 set.seed(42)
 c0 <- 10000
 n0 <- 5
