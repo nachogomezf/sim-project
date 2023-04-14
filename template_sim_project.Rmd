@@ -258,6 +258,8 @@ simulate_results <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
 }
 ```
 
+
+**AQUÍ IRÍA LO DE LOS PARAMETROS**
 ```{r do simulations, echo = FALSE}
 set.seed(42)
 c0 <- 1000
@@ -274,7 +276,7 @@ unlist(v$k)
 ```{r, echo = FALSE, fig.align='center'}
 make_plots(v$rn, v$ra, paste(c0, n0, a, tl, lambda, mu, nu, MC, sep = "_"))
 ```
-
+** AQUÍ UN BREVE COMENTARIO (ROLLO QUE EL ANTITHETIC ES MEJOR, PERO NO MUCHO, ETC) **
 Numerical results, quality assessment of the approximations, and time efficiency of the algorithms.
 
 # Conclusions
