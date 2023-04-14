@@ -33,14 +33,15 @@ If the initial capital is $c_0$ and the initial number of clients is $n_0$, we w
 
 # Introduction
 
-Each policyholder has a fixed amount $a$ to pay every year, so the capital of the company will increase by $a$ times the number of clients every fraction of year.
+The way we approach this problem is first defining the events that might happen, simulating when they will occur and adjusting the company's capital to these. Knowing this we define the following events
 
-On the other hand, they also hold the right to claim the premium on the policy, which happens according to a Poisson process with common rate $\lambda$.
-The amount of is this premium is distributed according to a Pareto distribution with parameters $\alpha = 2.5$ and $\beta = 100$.
+In an insurance company, each policyholder has to comply with a yearly fee, which in this case we denote as $a$. Then, for the firm, that is a fixed amount coming every year per client. We are also told that, if the client does not stay for the full year, they will only pay the fraction of the year they have been insured
 
-The clients of the company can leave the company at any time, and the time they stay in the company follows an exponential distribution with rate $\mu$.
+That policy gives the client the right to claim the premium on the policy (if the event they've been insured against happens), which we are told that happens in a certain interval of time. This intervals are independent and follow a probability distribution defined by a Poisson process with rate $\lambda$. The amount claimed by the client is called the premium, and is distributed according to a Pareto distribution with parameters $\alpha = 2.5$ and $\beta = 100$.
 
-Clients come according to an independent (homogeneous) Poisson processes with rate $\nu$, and they stay according to an exponentially distributed time with rate $\mu$.
+A third event could happen, which is that the clients of the company could leave the company at any time. The time a client stays at the insurance company also follows a probability distribution, an exponential one with rate $\mu$.
+
+Finally, a new client could join the insurance firm, which would mean that all the other events would apply to them. We are told that new clients come to the company following a Poisson process with rate $\nu$
 
 So in general, the capital of the company at any time $t$ will be: 
 
@@ -260,6 +261,7 @@ simulate_results <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
 
 
 **AQUÍ IRÍA LO DE LOS PARAMETROS**
+**1**
 ```{r do simulations, echo = FALSE}
 set.seed(42)
 c0 <- 1000
@@ -276,17 +278,52 @@ unlist(v$k)
 ```{r, echo = FALSE, fig.align='center'}
 make_plots(v$rn, v$ra, paste(c0, n0, a, tl, lambda, mu, nu, MC, sep = "_"))
 ```
-** AQUÍ UN BREVE COMENTARIO (ROLLO QUE EL ANTITHETIC ES MEJOR, PERO NO MUCHO, ETC) **
-Numerical results, quality assessment of the approximations, and time efficiency of the algorithms.
+**2**
+```{r do simulations, echo = FALSE}
+set.seed(42)
+c0 <- 100
+n0 <- 10000
+a <- 20
+tl <- 50
+lambda <- 0.05
+mu <- 0.2
+nu <- 0.6
+MC <- 10000
+v <- simulate_results(c0 = c0, n0 = n0, a = a, tl = tl, lambda = lambda, mu = mu, nu = nu, MC = MC)
+unlist(v$k)
+```
+```{r, echo = FALSE, fig.align='center'}
+make_plots(v$rn, v$ra, paste(c0, n0, a, tl, lambda, mu, nu, MC, sep = "_"))
+```
+**3**
+```{r do simulations, echo = FALSE}
+set.seed(42)
+c0 <- 10000
+n0 <- 5
+a <- 2000
+tl <- 25
+lambda <- 0.5
+mu <- 0.1
+nu <- 0.8
+MC <- 10000
+v <- simulate_results(c0 = c0, n0 = n0, a = a, tl = tl, lambda = lambda, mu = mu, nu = nu, MC = MC)
+unlist(v$k)
+```
+```{r, echo = FALSE, fig.align='center'}
+make_plots(v$rn, v$ra, paste(c0, n0, a, tl, lambda, mu, nu, MC, sep = "_"))
+```
+
+After these three simulations, we observe that the antithetic approach does indeed reduce the variance of the simulations, but it's a slight improvement, much less than expected. However, the computation time is reduced to half of the original one (in the end we are only computing half of the simulations)
+
 
 # Conclusions
 
-The results clearly show that the antithetic approach improves the first solution by far in terms of computing time. However, the variance reduction is not significantly lower compared to our model, as one would expect. This is because our approach is somewhat a simplification of this algorithm, as we are adapting our code to obtain negative correlated outputs instead of ...
+The results clearly show that the antithetic approach improves the first solution by far in terms of computing time. However, the variance reduction is not significantly lower compared to our model, as one would expect. This is because our approach is somewhat a simplification of this algorithm, as we are adapting our code to obtain negative correlated outputs so, in the end, we are just performing half of the simulations
 Throughout the project we had to deal with several difficulties:
 \begin{itemize}
 \item When developing our own algorithm we first decided to simulate the type of event and modify the variables accordingly, but that was not accurate since, before doing that, we should update the proportional part of the previous payments so that they would be taken into account in the next event
 \item We also had trouble coming up with the total number of events that were going to happen beforehand. We later discovered that it was not possible to do this since we were dealing with a Poisson process, and it fluctuates. We were just supposed to simulate the time until the next event, so that we could afterwards simulate which event would that be
-\item The main difficulty we encountered was in the antithetic approach. Our first attempt was to change the sign, which we did twice and hence, we obtained the same results in both cases. After observing that, we changed ...
+\item The main difficulty we encountered was in the antithetic approach. Our first attempt was to change the sign, which we did twice and hence, we obtained the same results in both cases. We had trouble understanding how to simulate two paths for the claims, so that we would archieve a version of the antithetic approach
 \end{itemize}
 
 Overall, this project provided us with a fine representation of how insurance policies are designed and what variables come into play when it comes to making money out of them.
