@@ -271,7 +271,15 @@ Numerical results, quality assessment of the approximations, and time efficiency
 
 # Conclusions
 
-About the results, how the difficulties were solved, and possible alternative approaches. Keep the focus, the conclusions must be as brief as possible.
+The results clearly show that the antithetic approach improves the first solution by far in terms of computing time. However, the variance reduction is not significantly lower compared to our model, as one would expect. This is because our approach is somewhat a simplification of this algorithm, as we are adapting our code to obtain negative correlated outputs instead of ...
+Throughout the project we had to deal with several difficulties:
+- When developing our own algorithm we first decided the type of event and acted accordingly but that was not accurate since, before doing that, we should update the proportional part of the previous payments so that they would be taken into account in the next event
+- We also had trouble coming up with the total number of events that were going to happen beforehand. We later discovered that it was not possible to do this since we were dealing with a Poisson process, and it fluctuates. We were just supposed to simulate the time until the next event, so that we could afterwards simulate which event would that be
+- The main difficulty we encountered was in the antithetic approach. Our first attempt was to change the sign, which we did twice and hence, we obtained the same results in both cases. After observing that, we changed ...
+
+Overall, this project provided us with a fine representation of how insurance policies are designed and what variables come into play when it comes to making money out of them.
+
+ 
 
 # References
 
