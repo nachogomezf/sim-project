@@ -83,7 +83,18 @@ knitr::include_graphics(c("mean_final_cap.png", "densities_final_caps.png"))
 
 # Conclusions
 
-About the results, how the difficulties were solved, and possible alternative approaches. Keep the focus, the conclusions must be as brief as possible.
+```{=tex}
+\begin{itemize}
+\item The antithetic approach does not significantly reduce the variance but it does improve the computing time, cutting it in half
+\item We also encountered some difficulties while developing the simulations
+\begin{itemize}
+\item Updating the proportional part of payments after simulating the type of event
+\item Trying to obtain the total number of events beforehand
+\item Antithetic variable approach showing the same results as our own approach
+\end{itemize}
+\item The project was a fine representation of how simulations can be used in the insurance policies business
+\end{itemize}
+```
 
 # References
 

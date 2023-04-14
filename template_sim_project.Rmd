@@ -273,7 +273,7 @@ Numerical results, quality assessment of the approximations, and time efficiency
 
 The results clearly show that the antithetic approach improves the first solution by far in terms of computing time. However, the variance reduction is not significantly lower compared to our model, as one would expect. This is because our approach is somewhat a simplification of this algorithm, as we are adapting our code to obtain negative correlated outputs instead of ...
 Throughout the project we had to deal with several difficulties:
-- When developing our own algorithm we first decided the type of event and acted accordingly but that was not accurate since, before doing that, we should update the proportional part of the previous payments so that they would be taken into account in the next event
+- When developing our own algorithm we first decided to simulate the type of event and modify the variables accordingly, but that was not accurate since, before doing that, we should update the proportional part of the previous payments so that they would be taken into account in the next event
 - We also had trouble coming up with the total number of events that were going to happen beforehand. We later discovered that it was not possible to do this since we were dealing with a Poisson process, and it fluctuates. We were just supposed to simulate the time until the next event, so that we could afterwards simulate which event would that be
 - The main difficulty we encountered was in the antithetic approach. Our first attempt was to change the sign, which we did twice and hence, we obtained the same results in both cases. After observing that, we changed ...
 
