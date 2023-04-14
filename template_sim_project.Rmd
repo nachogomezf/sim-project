@@ -222,7 +222,7 @@ make_plots <- function(res_normal, res_anti, filename){
         labs(x = "Number of simulations", y = "Mean of final capitals", 
                 title = "Convergence of the mean of the final capitals")
   plot(p1)
-  ggsave(paste("mean_final_cap", filename, ".png"), p1, width = 10, height = 5)
+  ggsave(paste("mean_final_cap", filename, ".png", sep=""), p1, width = 10, height = 5)
   p2 <- ggplot() + 
         geom_histogram(mapping= aes(x = num.normal, y=after_stat(density)),
                         binwidth=5000, color = "black", fill = "black", alpha = .5) +
@@ -231,7 +231,7 @@ make_plots <- function(res_normal, res_anti, filename){
         labs(x = "Final capitals", y = "Density", 
                 title = "Histogram of the final capitals")
   plot(p2)
-  ggsave(paste("densities_final_caps", filename, ".png"), p2, width = 10, height = 5)
+  ggsave(paste("densities_final_caps", filename, ".png",sep=""), p2, width = 10, height = 5)
 }
 ```
 
