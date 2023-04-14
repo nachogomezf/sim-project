@@ -194,17 +194,9 @@ simulate_one_insurance_antithetic <- function(c0, n0, a, tl, lambda, mu, nu) {
 
 ```{r antithetic}
 simulate_insurance_antithetic <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
-  final_capitals <- vector("numeric", MC)
-  # Simulate MC pairs of antithetic paths
-  # for (i in 1:(MC/2)) {
-  #   final_capitals[i] <- simulate_one_insurance(c0, n0, a, tl, lambda, mu, nu)
-  #   final_capitals[i + (MC/2)] <- simulate_one_insurance(c0, n0, a, tl, lambda, mu, nu) * -1
-  # }
-  # Compute and return outputs
-  # antithetic_final_capitals <- c(final_capitals[1:(MC/2)], -final_capitals[(MC/2+1):MC])
-  antithetic_final_capitals <- replicate(MC/2, simulate_one_insurance_antithetic(
+  antithetic_final_capitals <- replicate(MC, simulate_one_insurance_antithetic(
                                          c0, n0, a, tl, lambda, mu, nu))
-  fraction <- sum(antithetic_final_capitals > 0) / MC
+  fraction <- sum(antithetic_final_capitals > 0) /(MC*2)
   pos_fc <- antithetic_final_capitals[antithetic_final_capitals > 0]
   mean_final_capitals <- mean(pos_fc)
   sd_final_capitals <- sd(pos_fc)
@@ -215,56 +207,72 @@ simulate_insurance_antithetic <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
 
 # Results 
 
-```{r funsim, echo = FALSE}
-set.seed(42)
-res_normal <- simulate_insurance(c0 = 1000, n0 = 100, a = 100, tl = 100, 
-                          lambda = 0.1, mu = 0.1, nu = 0.3, MC = 10000)
-res_anti <- simulate_insurance_antithetic(c0 = 1000, n0 = 100, a = 100, tl = 100, 
-                          lambda = 0.1, mu = 0.1, nu = 0.3, MC = 10000)
-
-time_normal <- system.time(simulate_insurance(c0 = 1000, n0 = 100, a = 100, tl = 100, 
-                          lambda = 0.1, mu = 0.1, nu = 0.3, MC = 10000))
-time_anti <- system.time(simulate_insurance_antithetic(c0 = 1000, n0 = 100, a = 100, tl = 100, 
-                          lambda = 0.1, mu = 0.1, nu = 0.3, MC = 10000))
-names(time_normal)[3] <- "time elapsed"
-names(time_anti)[3] <- "time elapsed"
-```
-
-```{r results, echo = FALSE}
-kable(rbind(c(res_normal[1:3], time_normal[3]), c(res_anti[1:3], time_anti[3])), 
-      caption = "Results of the simulation with and without antithetic variates") # %>%
-  # kable_styling(latex_options = c("striped", "scale_down"), 
-                # full_width = FALSE)
-```
-
-
 ```{r create graphs, echo = FALSE, warning=FALSE}
-num.normal <- as.numeric(unlist(res_normal['pos_fc']))
-num.anti <- as.numeric(unlist(res_anti['pos_fc']))
-p1 <- ggplot() + 
-      geom_line(mapping=aes(x = 1:length(num.normal), 
-                            y = cumsum(num.normal)/(1:length(num.normal))),
-                color = "black") +
-      geom_line(mapping=aes(x=1:length(num.anti),
-                            y = cumsum(num.anti)/(1:length(num.anti))),
-                color = "red") +
-      labs(x = "Number of simulations", y = "Mean of final capitals",
-           title = "Convergence of the mean of the final capitals")
-plot(p1)
-ggsave("mean_final_cap.png", p1, width = 10, height = 5)
-p2 <- ggplot() + 
-      geom_histogram(mapping= aes(x = num.normal, y=after_stat(density)),
-                      binwidth=5000, color = "black", fill = "black", alpha = .5) + 
-      stat_function(fun=dnorm, args=list(mean=mean(num.normal), 
-                    sd = sd(num.normal), colour = "black")) +
-      geom_histogram(mapping= aes(x = num.anti, y=after_stat(density)),
-                      binwidth=5000, color = "red", fill = "red", alpha = .5) + 
-      stat_function(fun=dnorm, args=list(mean=mean(num.anti), 
-                    sd = sd(num.anti), colour = "red")) +
-      labs(x = "Final capitals", y = "Density", 
-              title = "Histogram of the final capitals")
-plot(p2)
-ggsave("densities_final_caps.png", p2, width = 10, height = 5)
+# Function to create the graphs and present them
+make_plots <- function(res_normal, res_anti, filename){
+  num.normal <- as.numeric(unlist(res_normal['pos_fc']))
+  num.anti <- as.numeric(unlist(res_anti['pos_fc']))
+  p1 <- ggplot() + 
+        geom_line(mapping=aes(x = 1:length(num.normal), 
+                              y = cumsum(num.normal)/(1:length(num.normal))),
+                  color = "black") +
+        geom_line(mapping=aes(x=1:length(num.anti),
+                              y = cumsum(num.anti)/(1:length(num.anti))),
+                  color = "red") +
+        labs(x = "Number of simulations", y = "Mean of final capitals", 
+                title = "Convergence of the mean of the final capitals")
+  plot(p1)
+  ggsave(paste("mean_final_cap", filename, ".png"), p1, width = 10, height = 5)
+  p2 <- ggplot() + 
+        geom_histogram(mapping= aes(x = num.normal, y=after_stat(density)),
+                        binwidth=5000, color = "black", fill = "black", alpha = .5) +
+        geom_histogram(mapping= aes(x = num.anti, y=after_stat(density)),
+                        binwidth=5000, color = "red", fill = "red", alpha = .5) + 
+        labs(x = "Final capitals", y = "Density", 
+                title = "Histogram of the final capitals")
+  plot(p2)
+  ggsave(paste("densities_final_caps", filename, ".png"), p2, width = 10, height = 5)
+}
+```
+
+```{r funsim, echo = FALSE, comment=NA}
+# Function to simulate the whole thing
+simulate_results <- function(c0, n0, a, tl, lambda, mu, nu, MC) {
+  res_normal <- simulate_insurance(c0=c0, n0=n0, a=a, tl= tl, mu=mu,
+                                   nu=nu, lambda=lambda, MC=MC)
+  res_anti <- simulate_insurance_antithetic(c0=c0, n0=n0, a=a, tl= tl, 
+                                            mu=mu, nu=nu, lambda=lambda,
+                                            MC=MC/2)
+
+  time_normal <- system.time(simulate_insurance(c0=c0, n0=n0, a=a, tl= tl, mu=mu, 
+                                                nu=nu, lambda=lambda, MC=MC))
+  time_anti <- system.time(simulate_insurance_antithetic(c0=c0, n0=n0, a=a, tl= tl, 
+                                                         mu=mu, nu=nu, lambda=lambda,
+                                                         MC=MC/2))
+  names(time_normal)[3] <- "time elapsed"
+  names(time_anti)[3] <- "time elapsed"
+  k <- kable(rbind(c("normal", res_normal[1:3], time_normal[3]), 
+                    c("antithetic", res_anti[1:3], time_anti[3])), 
+              caption = "Results of the simulation with and without antithetic variates")
+  return (list(k=k, rn=res_normal, ra=res_anti))
+}
+```
+
+```{r do simulations, echo = FALSE}
+set.seed(42)
+c0 <- 1000
+n0 <- 100
+a <- 100
+tl <- 100
+lambda <- 0.1
+mu <- 0.1
+nu <- 0.3
+MC <- 10000
+v <- simulate_results(c0 = c0, n0 = n0, a = a, tl = tl, lambda = lambda, mu = mu, nu = nu, MC = MC)
+unlist(v$k)
+```
+```{r, echo = FALSE, fig.align='center'}
+make_plots(v$rn, v$ra, paste(c0, n0, a, tl, lambda, mu, nu, MC, sep = "_"))
 ```
 
 Numerical results, quality assessment of the approximations, and time efficiency of the algorithms.
@@ -273,9 +281,11 @@ Numerical results, quality assessment of the approximations, and time efficiency
 
 The results clearly show that the antithetic approach improves the first solution by far in terms of computing time. However, the variance reduction is not significantly lower compared to our model, as one would expect. This is because our approach is somewhat a simplification of this algorithm, as we are adapting our code to obtain negative correlated outputs instead of ...
 Throughout the project we had to deal with several difficulties:
-- When developing our own algorithm we first decided to simulate the type of event and modify the variables accordingly, but that was not accurate since, before doing that, we should update the proportional part of the previous payments so that they would be taken into account in the next event
-- We also had trouble coming up with the total number of events that were going to happen beforehand. We later discovered that it was not possible to do this since we were dealing with a Poisson process, and it fluctuates. We were just supposed to simulate the time until the next event, so that we could afterwards simulate which event would that be
-- The main difficulty we encountered was in the antithetic approach. Our first attempt was to change the sign, which we did twice and hence, we obtained the same results in both cases. After observing that, we changed ...
+\begin{itemize}
+\item When developing our own algorithm we first decided to simulate the type of event and modify the variables accordingly, but that was not accurate since, before doing that, we should update the proportional part of the previous payments so that they would be taken into account in the next event
+\item We also had trouble coming up with the total number of events that were going to happen beforehand. We later discovered that it was not possible to do this since we were dealing with a Poisson process, and it fluctuates. We were just supposed to simulate the time until the next event, so that we could afterwards simulate which event would that be
+\item The main difficulty we encountered was in the antithetic approach. Our first attempt was to change the sign, which we did twice and hence, we obtained the same results in both cases. After observing that, we changed ...
+\end{itemize}
 
 Overall, this project provided us with a fine representation of how insurance policies are designed and what variables come into play when it comes to making money out of them.
 
