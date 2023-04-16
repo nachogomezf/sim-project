@@ -98,4 +98,3 @@ knitr::include_graphics(c("mean_final_cap.png", "densities_final_caps.png"))
 
 # References
 
-<div id="refs"></div>
