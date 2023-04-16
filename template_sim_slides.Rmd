@@ -7,8 +7,7 @@ output:
   beamer_presentation:
     colortheme: rose
     theme: Madrid
-bibliography: "cite_packages.bib"
-nocite: '@*'
+    
 ---
 
 ```{r setup, include=FALSE}
@@ -67,41 +66,42 @@ We used 2 different approaches for this problem
 \item An improved version of our algorithm using antithetic variables to reduce the variance
 \end{itemize}
 ```
-These were the results for $c_0 = 1000$, $n_0 = 100$, $a = 100$, $tl = 100$, $\lambda = 0.1$, $\mu = 0.1$, $\nu = 0.1$ and $MC = 10000$:
-
-```{r, out.width='80%', fig.align='center', echo=FALSE}
-knitr::include_graphics(c("results_table_comparison.png"))
-```
 
 # Results
 
-**1** Simulating with $c_0 = 1000$, $n_0 = 100$, $a = 100$, $t_l = 100$, $\lambda = 0.1$, $\mu = 0.1$, $\nu = 0.3$ and $M_C = 10000$.
-```{r, fig.show="hold", out.width="45%", echo=FALSE}
+## Simulating with $c_0 = 1000$, $n_0 = 100$, $a = 100$, $t_l = 100$, $\lambda = 0.1$, $\mu = 0.1$, $\nu = 0.3$ and $M_C = 10000$.
+```{r, fig.show="hold", out.width="45%", echo=FALSE, fig.align="center"}
 knitr::include_graphics(c("images-pres/mean_sim_1.png", "images-pres/densities_sim_1.png"))
+res_normal <- list(fraction=0.997, mean_final_capital=106475.972, sd_final_capital=10516.112, time_elapsed=17.860)
+res_anti <- list(fraction=1, mean_final_capital=106666.638, sd_final_capital=10361.448, time_elapsed=10.923)
+knitr::kable(rbind(c("Normal", res_normal), c("Antithetic", res_anti)), caption = "Results of the simulation with and without antithetic variates",
+                col.names = c("Approach", "Fraction", "Mean", "SD", "Time (s)"), digits=3)
 ```
-<div style="page-break-after: always;"></div>'
+<div style="page-break-after: always;"></div>
 
 # Results
-**2** Simulating with $c_0 = 100$, $n_0 = 10000$, $a = 20$, $t_l = 50$, $\lambda = 0.05$, $\mu = 0.2$, $\nu = 0.6$ and $M_C = 1000$.
-```{r, fig.show="hold", out.width="45%", echo=FALSE}
+
+## Simulating with $c_0 = 100$, $n_0 = 10000$, $a = 20$, $t_l = 50$, $\lambda = 0.05$, $\mu = 0.2$, $\nu = 0.6$ and $M_C = 1000$.
+```{r, fig.show="hold", out.width="45%", echo=FALSE, fig.align="center"}
 knitr::include_graphics(c("images-pres/mean_sim_2.png","images-pres/densities_sim_2.png"))
+res_normal <- list(fraction=0.752, mean_final_capital=585228.003, sd_final_capital=11936.203, time_elapsed=50.856)
+res_anti <- list(fraction=0.878, mean_final_capital=584761.761, sd_final_capital=12552.333, time_elapsed=28.775)
+knitr::kable(rbind(c("Normal", res_normal), c("Antithetic", res_anti)), caption = "Results of the simulation with and without antithetic variates",
+                col.names = c("Approach", "Fraction", "Mean", "SD", "Time (s)"), digits=3)
 ```
 <div style="page-break-after: always;"></div>
 
 # Results
-**3** Simulating with $c_0 = 10000$, $n_0 = 5$, $a = 2000$, $t_l = 25$, $\lambda = 0.5$, $\mu = 0.1$, $\nu = 0.8$ and $M_C = 10000$.
-```{r, fig.show="hold", out.width="45%", echo=FALSE}
+
+## Simulating with $c_0 = 10000$, $n_0 = 5$, $a = 2000$, $t_l = 25$, $\lambda = 0.5$, $\mu = 0.1$, $\nu = 0.8$ and $M_C = 10000$.
+```{r, fig.show="hold", out.width="45%", echo=FALSE, fig.align="center"}
 knitr::include_graphics(c("images-pres/mean_sim_3.png", "images-pres/densities_sim_3.png"))
+res_normal <- list(fraction=1, mean_final_capital=337549.707, sd_final_capital=78783.990, time_elapsed=7.770)
+res_anti <- list(fraction=1, mean_final_capital=338472.373, sd_final_capital=78277.099, time_elapsed=3.988)
+knitr::kable(rbind(c("Normal", res_normal), c("Antithetic", res_anti)), caption = "Results of the simulation with and without antithetic variates",
+                col.names = c("Approach", "Fraction", "Mean", "SD", "Time (s)"), digits=3)
 ```
 <div style="page-break-after: always;"></div>
-
-# Results
-
-These graphs show both the convergence of the mean of the final capitals in terms of the number of simulations and the density of the final capitals. Note that the color red indicates the antithetic variables approach
-
-```{r, fig.show="hold", out.width="45%", echo=FALSE}
-knitr::include_graphics(c("mean_final_cap.png", "densities_final_caps.png"))
-```
 
 # Conclusions
 
@@ -120,3 +120,33 @@ knitr::include_graphics(c("mean_final_cap.png", "densities_final_caps.png"))
 
 # References
 
+Cascos, Ignacio. 2023a. “Lecture Notes 2. Simulating Random Variables and Vectors.” Aula Global UC3M.
+
+———. 2023b. “Lecture Notes 4. Efficiency Improvement Techniques.” Aula Global UC3M.
+
+“Collective Risk Models.” 2008. In Modern Actuarial Risk Theory: Using r, 41-86. Berlin, Heidelberg:
+Springer Berlin Heidelberg. https://doi.org/10.1007/978-3-540-70998-5_3.
+
+Wickham, Hadley. 2016. Ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York. https:
+//ggplot2.tidyverse.org.
+
+Wickham, Hadley, Winston Chang, Lionel Henry, Thomas Lin Pedersen, Kohske Takahashi, Claus Wilke,
+Kara Woo, Hiroaki Yutani, and Dewey Dunnington. 2023. Ggplot2: Create Elegant Data Visualisations
+Using the Grammar of Graphics. https://CRAN.R-project.org/package=ggplot2.
+
+# References (Continued)
+Wickham, Hadley, Romain François, Lionel Henry, Kirill Müller, and Davis Vaughan. 2023. Dplyr: A
+Grammar of Data Manipulation. https://CRAN.R-project.org/package=dplyr.
+
+Wilke, Claus O. 2020. Cowplot: Streamlined Plot Theme and Plot Annotations for Ggplot2. https://wilkelab
+.org/cowplot/.
+
+Xie, Yihui. 2014. “Knitr: A Comprehensive Tool for Reproducible Research in R.” In Implementing
+Reproducible Computational Research, edited by Victoria Stodden, Friedrich Leisch, and Roger D. Peng.
+Chapman; Hall/CRC.
+
+———. 2015. Dynamic Documents with R and Knitr. 2nd ed. Boca Raton, Florida: Chapman; Hall/CRC.
+https://yihui.org/knitr/.
+
+———. 2023. Knitr: A General-Purpose Package for Dynamic Report Generation in r. https://yihui.org/knit
+r/.
