@@ -75,6 +75,28 @@ knitr::include_graphics(c("results_table_comparison.png"))
 
 # Results
 
+**1** Simulating with $c_0 = 1000$, $n_0 = 100$, $a = 100$, $t_l = 100$, $\lambda = 0.1$, $\mu = 0.1$, $\nu = 0.3$ and $M_C = 10000$.
+```{r, fig.show="hold", out.width="45%", echo=FALSE}
+knitr::include_graphics(c("images-pres/mean_sim_1.png", "images-pres/densities_sim_1.png"))
+```
+<div style="page-break-after: always;"></div>'
+
+# Results
+**2** Simulating with $c_0 = 100$, $n_0 = 10000$, $a = 20$, $t_l = 50$, $\lambda = 0.05$, $\mu = 0.2$, $\nu = 0.6$ and $M_C = 1000$.
+```{r, fig.show="hold", out.width="45%", echo=FALSE}
+knitr::include_graphics(c("images-pres/mean_sim_2.png","images-pres/densities_sim_2.png"))
+```
+<div style="page-break-after: always;"></div>
+
+# Results
+**3** Simulating with $c_0 = 10000$, $n_0 = 5$, $a = 2000$, $t_l = 25$, $\lambda = 0.5$, $\mu = 0.1$, $\nu = 0.8$ and $M_C = 10000$.
+```{r, fig.show="hold", out.width="45%", echo=FALSE}
+knitr::include_graphics(c("images-pres/mean_sim_3.png", "images-pres/densities_sim_3.png"))
+```
+<div style="page-break-after: always;"></div>
+
+# Results
+
 These graphs show both the convergence of the mean of the final capitals in terms of the number of simulations and the density of the final capitals. Note that the color red indicates the antithetic variables approach
 
 ```{r, fig.show="hold", out.width="45%", echo=FALSE}
