@@ -29,7 +29,7 @@ knitr::opts_chunk$set(echo = TRUE)
 -   Data:
     -   Yearly payment: $a$
     -   Claims rate: $Poisson (\lambda)$
-    -   Premium amount: $Pareto (2.5, 100)$
+    -   Claim amount: $Pareto (2.5, 100)$
     -   Enrollment rate: $Poisson(\nu)$
     -   Departure rate: $Exp(\mu)$
     -   Initial capital: $c_0$
