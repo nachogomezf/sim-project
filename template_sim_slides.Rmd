@@ -27,7 +27,7 @@ knitr::opts_chunk$set(echo = TRUE)
 -   Goal:
     -   Compute the probability that the capital of an insurance company remains positive during a given time period
 -   Data:
-    -   Premium: $a$
+    -   Yearly payment: $a$
     -   Claims rate: $Poisson (\lambda)$
     -   Premium amount: $Pareto (2.5, 100)$
     -   Enrollment rate: $Poisson(\nu)$
